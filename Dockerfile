@@ -1,6 +1,7 @@
 FROM python:3.9
 ADD . /yanxun
 WORKDIR /yanxun
+RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 # selanium testing
