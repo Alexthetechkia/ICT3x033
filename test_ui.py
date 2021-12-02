@@ -45,6 +45,6 @@ def test_ui(browser):
 
     # assert
     wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/a')))
-    result = browser.find_element(By.XPATH, '/html/body/text()')
+    result = browser.find_element(By.XPATH, '/html/body')
 
     assert input_text in result.text
