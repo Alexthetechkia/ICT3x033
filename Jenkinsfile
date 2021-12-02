@@ -27,22 +27,42 @@ pipeline {
                 sh 'docker build -t yanxun-image:latest .'
             }
         }
-
-        stage('Integration/UI Testing') {
-            agent {
-                docker {
-                    image 'yanxun-image:latest'
+    
+        stage('Test') {
+            parallel {
+                stage('Integration UI Testing') {
+                    agent {
+                        docker {
+                            image 'yanxun-image:latest'
+                        }
+                    }
+                    steps {
+                        sh 'nohup python3 app.py & pytest -s -rA --junitxml=logs/report.xml'
+                        sh 'pkill -f app.py'
+                    }
+                    post {
+                        always {
+                            junit testResults: 'logs/report.xml'
+                        }
+                    }
                 }
-            }
-            steps {
-                sh 'nohup python3 app.py & pytest -s -rA --junitxml=logs/report.xml'
-                sh 'pkill -f app.py'
-            }
-            post {
-                always {
-                    junit testResults: 'logs/report.xml'
+
+                stage('Code Quality Check via SonarQube') { 
+                    steps { 
+                        script { 
+                            def scannerHome = tool 'SonarQube'; 
+                            withSonarQubeEnv('SonarQube') { 
+                                sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=OWASP -Dsonar.sources=." 
+                            } 
+                        } 
+                    }
                 }
             }
         }
+    }
+    post { 
+        always { 
+            recordIssues enabledForFailure: true, tool: sonarQube() 
+        } 
     }
 }
