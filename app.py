@@ -11,10 +11,10 @@ def home():
         excluded_chars = "*?!'^+%&/()=}][{$#;"
         for char in search_term:
             if char in excluded_chars:
-                return render_template('index.html')
+                return render_template('index.html', rejected=True)
         return render_template('success.html', search_term=search_term)
                 
-    return render_template('index.html')
+    return render_template('index.html', rejected=False)
 
 
 if __name__ == "__main__":
